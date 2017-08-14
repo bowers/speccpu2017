@@ -1,0 +1,938 @@
+SPEC CPU 2017 v1.0
+
+SPEC CPU(R) 2017 is designed to provide a comparative measure of 
+compute-intensive performance across the widest practical range of hardware 
+using workloads developed from real user applications. Metrics for both integer 
+and floating point compute intensive performance are provided, with both
+speed and rate metrics for each. Full documentation is available on the SPEC 
+website: http://www.spec.org/cpu2017/. 
+
+In order to use this benchmark, SPEC CPU must be installed and the [spec_dir]/config 
+directory must be writable by the benchmark user. The runtime parameters 
+defined below essentially determine the 'runcpu' arguments.
+
+SPEC CPU2017 consists of a total of 43 individual benchmarks divided into 4
+suites: SPECspeed(R)2017 Integer, SPECspeed(R)2017 Floating Point, 
+SPECrate(R)2017 Integer, and SPECRate(R)2017 Floating point. Aggregate scores are
+calculated for each suite by a geomean of the median results of the individual benchmarks
+in that suite.
+
+TESTING PARAMETERS
+
+* benchmark                  the benchmark(s) to run - any of the benchmark 
+                             identifiers listed in config/spec-benchmarks.ini 
+                             may be specified. This argument can be repeated 
+                             to designate multiple benchmarks. You may specify
+                             'all' for all benchmarks, 'intrate' for all Integer
+                             Rate benchmarks, 'intspeed' for all Integer Speed
+                             benchmarks, 'fprate' for all floating point rate
+                             benchmarks, 'fpspeed' for all floating point speed
+                             benchmarks, or the name of a specific benchmark.
+                             Benchmarks may be referenced either by their 
+                             numeric or full identifier (e.g. --benchmark=500
+                             or --benchmark=500.perlbench_r). Additionally, you
+                             may designate benchmarks that should be removed
+                             by prefixing them with a minus character
+                             (e.g. --benchmark=all --benchmark=-631). May also
+                             be specified using a single space or comma 
+                             separated value (e.g. --benchmark "all -631")
+                             DEFAULT: all
+                             
+* collectd_rrd               If set, collectd rrd stats will be captured from 
+                             --collectd_rrd_dir. To do so, when testing starts,
+                             existing directories in --collectd_rrd_dir will 
+                             be renamed to .bak, and upon test completion 
+                             any directories not ending in .bak will be zipped
+                             and saved along with other test artifacts (as 
+                             collectd-rrd.zip). User MUST have sudo privileges
+                             to use this option
+
+* collectd_rrd_dir           Location where collectd rrd files are stored - 
+                             default is /var/lib/collectd/rrd
+
+* comment                    optional comment to add to the log file
+                             DEFAULT: none
+
+* config                     name of a configuration file in [spec_dir]/config 
+                             to use for the run. The following macros will be 
+                             automatically set via the --define argument 
+                             capability of runspec (optional parameters will 
+                             only be present if specified by the user):
+
+                             cpu_cache:          level 2 cpu cache 
+                                                 (e.g. 4096 KB)
+
+                             cpu_count:          the number of CPU cores present
+
+                             cpu_family:         numeric CPU family identifier
+
+                             cpu_model:          numeric CPU model identifier
+
+                             cpu_speed:          the nominal CPU speed in MHz 
+                                                 (e.g. 2933.436)
+
+                             cpu_speed_max:      the maximum turbo CPU speed in MHz 
+                                                 (e.g. 3500.0)
+
+                             cpu_vendor:         the CPU vendor 
+                                                 (e.g. GenuineIntel)
+
+                             compute_service_id: the compute service ID
+
+                             external_id:        an external identifier for the 
+                                                 compute resource
+
+                             instance_id:        identifier for the compute 
+                                                 resource under test 
+                                                 (e.g. m1.xlarge)
+
+                             ip_or_hostname:     IP or hostname of the compute 
+                                                 resource
+
+                             is32bit:            set if the OS is 32 bit
+
+                             is64bit:            set if the OS is 64 bit
+
+                             iteration_num:      the test iteration number 
+                                                 (e.g. 2)
+
+                             meta_*:             any of the meta parameters 
+                                                 listed below
+
+                             label:              user defined label for the 
+                                                 compute resource
+
+                             location:           location of the compute 
+                                                 resource (e.g. CA, US)
+
+                             memory_free:        free memory in KB
+
+                             memory_total:       total memory in KB
+
+                             numa:               set only if the system under
+                                                 test has numa support
+
+                             os:                 the operating system name 
+                                                 (e.g. centos)
+
+                             os_version:         the operating system version 
+                                                 (e.g. 6.2)
+
+                             provider_id:        the provider identifier 
+                                                 (e.g. aws)
+
+                             region:             compute resource region 
+                                                 identifier (e.g. us-west)
+
+                             run_id:             the benchmark run ID
+
+                             run_name:           the name of the run (if 
+                                                 assigned by the user)
+
+                             sse:                the highest SSE flag supported
+
+                             storage_config:     storage config identifier 
+                                                 (e.g. ebs, ephemeral)
+
+                             subregion:          compute resource subregion 
+                                                 identifier (e.g. 1a)
+
+                             test_id:            a user defined test identifier
+
+                             x64:                set if the x64 parameter is 
+                                                 also set
+
+                             if this parameter value identifies a remote file 
+                             (either an absolute or relative path on the 
+                             compute resource, or an external reference like 
+                             http://...) that file will be automatically copied 
+                             into the [spec_dir]/config directory - if not specified,
+                             a default.cfg file should be present in the config
+                             directory
+                             DEFAULT: none
+
+* copies                     the number of copies to run concurrently for a rate
+                             benchmark. A higher number of copies will generally produce
+                             a better score (subject to resource availability for those 
+                             copies to run). This parameter value may be one of 
+                             the following:
+            
+                             cpu relative:    a percentage relative to the 
+                                              number of CPU cores present. For 
+                                              example, if copies=50% and the 
+                                              compute instance has 4 cores, 2 
+                                              copies will be run - standard 
+                                              rounding will be used
+
+                             fixed:           a simple numeric value 
+                                              representing the number of copies 
+                                              to run (e.g. copies=2)
+
+                             memory relative: a memory to copies size ratio. 
+                                              For example, if copies=2GB and 
+                                              the compute instance has 16GB of 
+                                              memory, then 8 copies will be run
+                                              standard rounding will be used. 
+                                              Either MB or GB suffix may be 
+                                              used
+
+                             mixed:           a combination of the above 3 types 
+                                              may be used, each value separated 
+                                              by a forward slash /. For example, 
+                                              if copies=100%/2GB, then the number 
+                                              of copies will be the lesser of 
+                                              either the number of CPU cores or 
+                                              memory/2GB. Alternatively, if this 
+                                              value is prefixed by a +, the 
+                                              greater of the values will be 
+                                              used (e.g. copies=+100%/2GB)
+
+                             The general recommend ratio of copies to resources 
+                             is TBD GB of memory for 64 bit binaries,  TBD GB of 
+                             memory for 32 bit binaries, 1 CPU core and TBD GB 
+                             of free disk space. To specify a different number
+                             of copies for 32-bit binaries versus 64-bit 
+                             binaries (based on the value of the x64 parameter 
+                             defined below), separate the values with a pipe, 
+                             and prefix the 64-bit specified value with x64: 
+                             (e.g. copies="x64:100%/2GB|100%/1GB")
+                             DEFAULT: x64:100%/1GB|100%/512MB (NULL for speed runs)
+
+* define_*                   additional macros to define using the runspec 
+                             --define capability (these will be accessible in 
+                             the config file using the format %{macro_name}) - 
+                             any number of defines may be specified. 
+                             Conditional logic within the config file is 
+                             supported using the format:
+																%ifdef %{macro_name}
+																  # do something
+																%else
+																  # do something else
+																%endif
+                             More information is available about the use of 
+                             macros on the SPEC website here: 
+                             http://www.spec.org/cpu2006/Docs/config.html#sectionI.D.2
+                             For flags - do not set a value for this parameter
+                             (e.g. -p define_smt translates to --define smt)
+                             DEFAULT: none
+
+* delay                      Add a delay of the specified number of seconds 
+                             before and after each benchmark. The delay is not 
+                             counted toward the benchmark runtime.
+                             DEFAULT: none
+
+* failover_no_sse            When set to 1 in combination with an sse parameter
+                             benchmark execution will be re-attempted without 
+                             sse if runspec execution with sse results in an 
+                             error status code (runspec will be restarted 
+                             without the sse macro set)
+                             DEFAULT: 0
+
+* flagsurl                   Path to a flags file to use for the run - A flags 
+                             file provides information about how to interpret 
+                             and report on flags (e.g. -O5, -fast, etc.) that
+                             are used in a config file. The flagsurl may be an 
+                             absolute or relative path in the file system, or 
+                             refer to an http accessible file
+                             (e.g. $[top]/config/flags/Intel-ic17.0-official-linux64-revE.xml)
+                             Alternatively, flagsurl can be defined in the 
+                             config file
+                             DEFAULT: none
+
+* huge_pages                 Whether or not to enable huge pages if 
+                             supported by the OS. To do so, prior to runspec
+                             execution, if the file /usr/lib64/libhugetlbfs.so
+                             or /usr/lib/libhugetlbfs.so exists, it then checks
+                             that free huge pages are available in /proc/meminfo
+                             and if these conditions are met, sets the following 
+                             environment variables:
+                               export HUGETLB_MORECORE=yes
+                               export LD_PRELOAD=/usr/lib/libhugetlbfs.so
+                             Note: In order to use huge pages, you must enable 
+                             them first using something along the lines of:
+                               # first clear out existing huge pages
+                               echo  0 > /proc/sys/vm/nr_hugepages
+                               # create 500 2MB huge pages (1GB total) - 2MB is
+                               # the default huge page size on RHEL6
+                               echo 500 > /proc/sys/vm/nr_hugepages
+                               # mount the huge pages
+                               mkdir -p /libhugetlbfs
+                               mount -t hugetlbfs hugetlbfs /libhugetlbfs
+                             Note: CentOS 6+ supports transparent huge pages 
+                             (THP) by default. This parameter will likely have 
+                             little effect on systems where THP is already 
+                             enabled
+                             DEFAULT: 0
+
+* ignore_errors              whether or not to ignore errors - if 0, benchmark 
+                             execution will stop if any errors occur
+                             DEFAULT: 0
+
+* iterations                 How many times to run each benchmark. This 
+                             parameter should only be changed if reportable=0
+                             because reportable runs must use 2 or 3 iterations
+                             DEFAULT: 3 (not used if reportable=1)
+
+* max_copies                 May be used in conjunction with dynamic copies
+                             calculation (see copies parameter above) in order
+                             to set a hard limit on the number of copies
+                             DEFAULT: none (no limit)
+
+* nobuild                    If 1, don't build new binaries if they do not 
+                             already exist
+                             DEFAULT: 1
+                             
+* nocleanup                  Do not delete test files generated by SPEC 
+                             (i.e. [spec]/benchspec/CPU2017/[benchmark]/run/*)
+                             DEFAULT: 0
+
+* nonuma                     Do not set the 'numa' macro or invoke using 
+                             'numactl --interleave=all' even if numa is 
+                             supported
+                             DEFAULT: 0
+                             
+* nosse_macro                Optional macro to define for --sse optimal if no 
+                             SSE flag will be set
+                             
+* output                     The output directory to use for writing test 
+                             artifacts. If not specified, the current working 
+                             directory will be used
+
+* purge_output               Whether or not to remote run files (created in the 
+                             [spec_dir]/benchspec/CPU2017/*/run/ directories) 
+                             following benchmarking completion
+                             DEFAULT: 1
+
+* reportable                 whether or not to designate the run as reportable,  
+                             only int, fp or all benchmarks can be designated 
+                             as reportable. Per the official documentation: A 
+                             reportable execution runs all the benchmarks in a 
+                             suite with the test and train data sets as an 
+                             additional verification that the benchmark 
+                             binaries get correct results. The test and train 
+                             workloads are not timed. Then, the reference 
+                             workloads are run three times, so that median run 
+                             time can be determined for each benchmark.
+                             DEFAULT: 0
+
+* review                     Format results for review, meaning that additional 
+                             detail will be printed that normally would not be 
+                             present
+                             DEFAULT: 0
+                             
+* run_timeout                The amount of time to allow each test iteration to
+                             run
+                             DEFAULT: 72 hours
+
+* size                       Size of the input data to run: test, train or ref
+                             DEFAULT: ref
+
+* spec_dir                   Directory where SPEC CPU 2017 is installed. If not 
+                             specified, the benchmark run script will look up 
+                             the directory tree from both pwd and --output for 
+                             presence of a 'cpu2017'. If this fails, it will 
+                             check '/opt/cpu2017'
+
+* sse                        Run with a specific SSE optimization flag - if not
+                             specified, the most optimal SSE flag will be used 
+                             for the processor in use. The options availabe for
+                             this parameter are:
+
+                             optimal: choose the most optimal flag
+                             none:    do not use SSE optimizations
+                             CORE-AVX512:  AVX-512 instructions
+                             CORE-AVX2:    AVX2 instructions
+                             AVX:          AVX instructions
+                             SSE4.2:       SSE4.2 instructions
+                             SSE4.1:       SSE4.1 instructions
+                             SSSE3:        SSSE3 instructions
+                             SSE3:         SSE3 instructions
+                             SSE2:         SSE2 instructions
+                             SSE:          SSE instructions
+                             DEFAULT: optimal
+
+* sse_max                    The max SSE flag to support in conjunction with 
+                             sse=optimal - if a processor supports greater than 
+                             this SSE level, sse_max will be used instead
+                             DEFAULT: CORE-AVX2
+
+* sse_min                    The minimum SSE flag to support in conjunction with 
+                             sse=optimal - if a processor does not at least 
+                             support this SSE level sse optimization will not 
+                             be used
+                             DEFAULT: SSE4.2
+                             
+* sse_skip                   Use in conjunction with sse=optimal to skip a 
+                             specific SSE flag
+
+* tune                       Tuning option: base, peak or all - reportable runs 
+                             must be either base or all
+                             DEFAULT: base
+
+* validate_disk_space        Whether or not to validate if there is sufficient 
+                             diskspace available for a run - this calculation
+                             is based on a minimum requirement of 2GB per copy
+                             If this space is not available, the run will fail
+                             DEFAULT: 1
+                             
+* verbose                    Show verbose output
+
+* x64                        Optional parameter that will be passed into 
+                             runspec using the macro --define x64 - this may be 
+                             used to designate that a run utilize 32-bit versus 
+                             64-bit binaries - this parameter can also affect 
+                             the dynamic calculation of the 'copies' parameter
+                             described above. Valid options are 0, 1 or 2
+                             DEFAULT: 2 (64-bit binaries for 64-bit systems, 
+                             32-bit otherwise)
+
+* x64_failover               This flag will cause testing to be re-attempted
+                             for the opposite x64 flag if current testing 
+                             fails (e.g. if initial testing is x64=1 and it 
+                             fails, then testing will be re-attempted with 
+                             x64=0). When used in conjunction with 
+                             failover_no_sse, sse failover will take precedence 
+                             followed by x64 failover
+                             DEFAULT: 0
+
+
+META PARAMETERS
+If set, these parameters will be included in the results generated using 
+save.sh. Additionally, the parameters with a * suffix can be used to change the 
+values in the SPEC CPU 2017 config file using macros. When specified, each of 
+these parameters will be passed in to runcpu using 
+--define [parameter_name]=[parameter_value] and will then be accessible in the 
+config using macros %{parameter_name}
+
+* meta_burst                 If set to 1, designates testing performed in burst 
+                             mode (e.g. Amazon EC2 t-series burst)
+                             
+* meta_compiler              Details about the compiler (e.g. "Intel v16")
+
+* meta_compute_service       The name of the compute service this test pertains
+                             to. May also be specified using the environment 
+                             variable bm_compute_service
+                            
+* meta_compute_service_id    The id of the compute service this test pertains
+                             to. Added to saved results. May also be specified 
+                             using the environment variable bm_compute_service_id
+                            
+* meta_cpu                   CPU descriptor - if not specified, it will be set 
+                             using the 'model name' attribute in /proc/cpuinfo
+                            
+* meta_fw_bios*              Customer-orderable name and version of the system
+                             firmware, sometimes called BIOS.
+
+* meta_instance_id           The compute service instance type this test pertains 
+                             to (e.g. c3.xlarge). May also be specified using 
+                             the environment variable bm_instance_id
+                             
+* meta_hw_avail*             Date that this hardware or instance type was made 
+                             available
+                             
+* meta_hw_nthreadspercore*   Number of hardware threads per core - DEFAULT 1
+
+* meta_hw_other*             Any other relevant information about the instance 
+                             type
+
+* meta_hw_ocache*            Other hardware primary cache
+
+* meta_hw_pcache*            Hardware primary cache
+
+* meta_hw_tcache*            Hardware tertiary cache
+
+* meta_hw_ncpuorder*         Valid number of processors orderable for this 
+                             model, including a unit. (e.g. "2, 4, 6, or 
+                             8 chips"
+                             
+* meta_license_num*          The SPEC CPU 2017 license number
+                            
+* meta_memory                Memory descriptor - if not specified, the system
+                             memory size will be used
+                             
+* meta_notes_N*              General notes - all of the meta_notes_* parameters 
+                             support up to 5 entries (N=1-5)
+                             
+* meta_notes_base_N*         Notes about base optimization options
+                             
+* meta_notes_comp_N*         Notes about compiler invocation
+
+* meta_notes_os_N*           Notes about operating system tuning and changes
+
+* meta_notes_part_N*         Notes about component parts (for kit-built systems)
+
+* meta_notes_peak_N*         Notes about peak optimization options
+
+* meta_notes_plat_N*         Notes about platform tuning and changes
+
+* meta_notes_port_N*         Notes about portability options
+                             
+* meta_notes_submit_N*       Notes about use of the submit option
+                            
+* meta_os                    Operating system descriptor - if not specified, 
+                             it will be taken from the first line of /etc/issue
+                            
+* meta_provider              The name of the cloud provider this test pertains
+                             to. May also be specified using the environment 
+                             variable bm_provider
+                            
+* meta_provider_id           The id of the cloud provider this test pertains
+                             to. May also be specified using the environment 
+                             variable bm_provider_id
+                            
+* meta_region                The compute service region this test pertains to. 
+                             May also be specified using the environment 
+                             variable bm_region
+                            
+* meta_resource_id           An optional benchmark resource identifiers. May 
+                             also be specified using the environment variable 
+                             bm_resource_id
+                            
+* meta_run_id                An optional benchmark run identifiers. May also be 
+                             specified using the environment variable bm_run_id
+                            
+* meta_storage_config        Storage configuration descriptor. May also be 
+                             specified using the environment variable 
+                             bm_storage_config
+                             
+* meta_sw_avail*             Date that the OS image was made available
+
+* meta_sw_other*             Any other relevant information about the software
+                            
+* meta_test_id               Identifier for the test. May also be specified 
+                             using the environment variable bm_test_id
+                             
+                             
+DEPENDENCIES
+This benchmark has the following dependencies:
+
+ SPEC CPU 2017               This benchmark is licensed by spec.org. To use 
+                             this benchmark harness you must have it installed
+                             and available in the 'spec_dir' directory
+ perl                        Used by SPEC CPU 2017
+ php-cli                     Test automation scripts (/usr/bin/php)
+ zip                         Used to compress test artifacts
+ 
+ 
+TEST ARTIFACTS
+This benchmark generates the following artifacts:
+
+collectd-rrd.zip             collectd RRD files (see --collectd_rrd)
+specint2017.csv              SPECint test results in CSV format
+specint2017.gif              GIF image referenced in the SPECint HTML report
+specint2017.html             HTML formatted SPECint test report
+specint2017.pdf              PDF formatted SPECint test report
+specint2017.txt              Text formatted SPECint test report
+specfp2017.csv               SPECfp test results in CSV format
+specfp2017.gif               GIF image referenced in the SPECfp HTML report
+specfp2017.html              HTML formatted SPECfp test report
+specfp2017.pdf               PDF formatted SPECfp test report
+specfp2017.txt               Text formatted SPECfp test report
+
+
+SAVE SCHEMA
+The following columns are included in CSV files/tables generated by save.sh. 
+Indexed MySQL/PostgreSQL columns are identified by *. Columns without 
+descriptions are documented as runtime parameters above. Data types and 
+indexing used are documented in save/schema/speccpu2017.json. Columns can be
+removed using the save.sh --remove parameter
+
+# Individual benchmark metrics. These provide the selected, min, max and 
+# (sample) standard deviation metrics for each benchmark as well as runtime and
+# reftime (reftime only included for speed runs: rate=0). For rate runs 
+# (i.e. rate=1) the metrics represent the 'rate' metric - signifying that 
+# multiple copies of the benchmark were run in parallel (i.e. --copies > 1). 
+# Rate metrics essentially represent throughput. For speed runs these columns 
+# contain a 'ratio' metric derived from ([base_run_time]/[ref_time]). For speed
+# runs, only 1 copy of the benchmark is run. These columns may be excluded using 
+# --remove benchmark_4*
+
+500.perlbench_r
+500.perlbench_r_max
+500.perlbench_r_min
+500.perlbench_r_reftime
+500.perlbench_r_runtime
+500.perlbench_r_stdev
+502.gcc_r 
+502.gcc_r_max
+502.gcc_r_min
+502.gcc_r_reftime
+502.gcc_r_runtime
+502.gcc_r_stdev
+503.bwaves_r 
+503.bwaves_r_max
+503.bwaves_r_min
+503.bwaves_r_reftime
+503.bwaves_r_runtime
+503.bwaves_r_stdev
+505.mcf_r 
+505.mcf_r_max
+505.mcf_r_min
+505.mcf_r_reftime
+505.mcf_r_runtime
+505.mcf_r_stdev
+507.cactuBSSN_r
+507.cactuBSSN_r_max
+507.cactuBSSN_r_min
+507.cactuBSSN_r_reftime
+507.cactuBSSN_r_runtime
+507.cactuBSSN_r_stdev
+508.namd_r 
+508.namd_r_max
+508.namd_r_min
+508.namd_r_reftime
+508.namd_r_runtime
+508.namd_r_stdev
+510.parest_r 
+510.parest_r_max
+510.parest_r_min
+510.parest_r_reftime
+510.parest_r_runtime
+510.parest_r_stdev
+511.povray_r 
+511.povray_r_max
+511.povray_r_min
+511.povray_r_reftime
+511.povray_r_runtime
+511.povray_r_stdev
+519.lbm_r 
+519.lbm_r_max
+519.lbm_r_min
+519.lbm_r_reftime
+519.lbm_r_runtime
+519.lbm_r_stdev
+520.omnetpp_r 
+520.omnetpp_r_max
+520.omnetpp_r_min
+520.omnetpp_r_reftime
+520.omnetpp_r_runtime
+520.omnetpp_r_stdev
+521.wrf_r 
+521.wrf_r_max
+521.wrf_r_min
+521.wrf_r_reftime
+521.wrf_r_runtime
+521.wrf_r_stdev
+523.xalancbmk_r
+523.xalancbmk_r_max
+523.xalancbmk_r_min
+523.xalancbmk_r_reftime
+523.xalancbmk_r_runtime
+523.xalancbmk_r_stdev
+525.x264_r 
+525.x264_r_max
+525.x264_r_min
+525.x264_r_reftime
+525.x264_r_runtime
+525.x264_r_stdev
+526.blender_r 
+526.blender_r_max
+526.blender_r_min
+526.blender_r_reftime
+526.blender_r_runtime
+526.blender_r_stdev
+527.cam4_r 
+527.cam4_r_max
+527.cam4_r_min
+527.cam4_r_reftime
+527.cam4_r_runtime
+527.cam4_r_stdev
+531.deepsjeng_r
+531.deepsjeng_r_max
+531.deepsjeng_r_min
+531.deepsjeng_r_reftime
+531.deepsjeng_r_runtime
+531.deepsjeng_r_stdev
+538.imagick_r 
+538.imagick_r_max
+538.imagick_r_min
+538.imagick_r_reftime
+538.imagick_r_runtime
+538.imagick_r_stdev
+541.leela_r 
+541.leela_r _max
+541.leela_r _min
+541.leela_r _reftime
+541.leela_r _runtime
+541.leela_r _stdev
+544.nab_r 
+544.nab_r_max
+544.nab_r_min
+544.nab_r_reftime
+544.nab_r_runtime
+544.nab_r_stdev
+548.exchange2_r
+548.exchange2_r_max
+548.exchange2_r_min
+548.exchange2_r_reftime
+548.exchange2_r_runtime
+548.exchange2_r_stdev
+549.fotonik3d_r
+549.fotonik3d_r_max
+549.fotonik3d_r_min
+549.fotonik3d_r_reftime
+549.fotonik3d_r_runtime
+549.fotonik3d_r_stdev
+554.roms_r 
+554.roms_r_max
+554.roms_r_min
+554.roms_r_reftime
+554.roms_r_runtime
+554.roms_r_stdev
+557.xz_r 
+557.xz_r_max
+557.xz_r_min
+557.xz_r_reftime
+557.xz_r_runtime
+557.xz_r_stdev
+600.perlbench_s 
+600.perlbench_s_max
+600.perlbench_s_min
+600.perlbench_s_reftime
+600.perlbench_s_runtime
+600.perlbench_s_stdev
+602.gcc_s 
+602.gcc_s_max
+602.gcc_s_min
+602.gcc_s_reftime
+602.gcc_s_runtime
+602.gcc_s_stdev
+603.bwaves_s 
+603.bwaves_s_max
+603.bwaves_s_min
+603.bwaves_s_reftime
+603.bwaves_s_runtime
+603.bwaves_s_stdev
+605.mcf_s 
+605.mcf_s_max
+605.mcf_s_min
+605.mcf_s_reftime
+605.mcf_s_runtime
+605.mcf_s_stdev
+607.cactuBSSN_s
+607.cactuBSSN_s_max
+607.cactuBSSN_s_min
+607.cactuBSSN_s_reftime
+607.cactuBSSN_s_runtime
+607.cactuBSSN_s_stdev
+619.lbm_s 
+619.lbm_s_max
+619.lbm_s_min
+619.lbm_s_reftime
+619.lbm_s_runtime
+619.lbm_s_stdev
+620.omnetpp_s 
+620.omnetpp_s_max
+620.omnetpp_s_min
+620.omnetpp_s_reftime
+620.omnetpp_s_runtime
+620.omnetpp_s_stdev
+621.wrf_s 
+621.wrf_s_max
+621.wrf_s_min
+621.wrf_s_reftime
+621.wrf_s_runtime
+621.wrf_s_stdev
+623.xalancbmk_s 
+623.xalancbmk_s_max
+623.xalancbmk_s_min
+623.xalancbmk_s_reftime
+623.xalancbmk_s_runtime
+623.xalancbmk_s_stdev
+625.x264_s 
+625.x264_s_max
+625.x264_s_min
+625.x264_s_reftime
+625.x264_s_runtime
+625.x264_s_stdev
+627.cam4_s 
+627.cam4_s_max
+627.cam4_s_min
+627.cam4_s_reftime
+627.cam4_s_runtime
+627.cam4_s_stdev
+628.pop2_s 
+628.pop2_s_max
+628.pop2_s_min
+628.pop2_s_reftime
+628.pop2_s_runtime
+628.pop2_s_stdev
+631.deepsjeng_s 
+631.deepsjeng_s_max
+631.deepsjeng_s_min
+631.deepsjeng_s_reftime
+631.deepsjeng_s_runtime
+631.deepsjeng_s_stdev
+638.imagick_s 
+638.imagick_s_max
+638.imagick_s_min
+638.imagick_s_reftime
+638.imagick_s_runtime
+638.imagick_s_stdev
+641.leela_s 
+641.leela_s_max
+641.leela_s_min
+641.leela_s_reftime
+641.leela_s_runtime
+641.leela_s_stdev
+644.nab_s 
+644.nab_s_max
+644.nab_s_min
+644.nab_s_reftime
+644.nab_s_runtime
+644.nab_s_stdev
+648.exchange2_s 
+648.exchange2_s_max
+648.exchange2_s_min
+648.exchange2_s_reftime
+648.exchange2_s_runtime
+648.exchange2_s_stdev
+649.fotonik3d_s
+649.fotonik3d_s_max
+649.fotonik3d_s_min
+649.fotonik3d_s_reftime
+649.fotonik3d_s_runtime
+649.fotonik3d_s_stdev
+654.roms_s 
+654.roms_s_max
+654.roms_s_min
+654.roms_s_reftime
+654.roms_s_runtime
+654.roms_s_stdev
+657.xz_s 
+657.xz_s_max
+657.xz_s_min
+657.xz_s_reftime
+657.xz_s_runtime
+657.xz_s_stdev
+
+
+benchmark_version: [benchmark version]
+benchmarks: comma separated names of benchmarks run - or int, fp or all
+collectd_rrd: [URL to zip file containing collectd rrd files]
+comment
+config: config file name
+copies: number of copies (for rate runs only)
+delay
+failover_no_sse
+flagsurl: flags file url
+huge_pages
+ignore_errors
+iteration: [iteration number (used with incremental result directories)]
+iterations: number of iterations - 3 is default (2 or 3 required for compliant runs)
+max_copies
+meta_burst
+meta_compiler
+meta_compute_service 
+meta_compute_service_id*
+meta_cpu: [CPU model info]
+meta_cpu_cache: [CPU cache]
+meta_cpu_cores: [# of CPU cores]
+meta_cpu_speed: [nominal CPU clock speed (MHz)]
+meta_cpu_speed_max: [max CPU clock speed (MHz)]
+meta_fw_bios [system firmware name]
+meta_instance_id*
+meta_hostname: [system under test (SUT) hostname]
+meta_hw_avail 
+meta_hw_nthreadspercore 
+meta_hw_other 
+meta_hw_ocache 
+meta_hw_pcache 
+meta_hw_tcache 
+meta_hw_ncpuorder 
+meta_license_num 
+meta_memory 
+meta_memory_gb: [memory in gigabytes]
+meta_memory_mb: [memory in megabytes]
+meta_notes 
+meta_notes_base 
+meta_notes_comp 
+meta_notes_os 
+meta_notes_part 
+meta_notes_peak 
+meta_notes_plat 
+meta_notes_submit 
+meta_os_info: [operating system name and version]
+meta_provider 
+meta_provider_id*
+meta_region*
+meta_resource_id 
+meta_run_id 
+meta_storage_config*
+meta_sw_avail 
+meta_sw_other 
+meta_test_id*
+nobuild
+nonuma
+numa: true if numa was supported and used (--define numa flag and numactl)
+num_benchmarks: total number of individual benchmarks run
+peak: true for a peak run, false for a base run
+purge_output
+rate: true for a rate run, false for a speed run
+
+reportable
+review
+size: input data size - test, train or ref
+spec_dir
+specspeed2017_fp_peak: peak, speed floating point score (only present if rate=0 and peak=1)
+specspeed2017_fp_base: base, speed floating point score (only present if rate=0 and peak=0)
+specfp_csv: [URL to the SPECfp CSV format report (if save.sh --store option used)]
+specfp_gif: [URL to the SPECfp HTML report GIF image (if save.sh --store option used)]
+specfp_html: [URL to the SPECfp HTML format report (if save.sh --store option used)]
+specfp_pdf: [URL to the SPECfp PDF format report (if save.sh --store option used)]
+specrate2017_fp_peak: peak, rate floating point score (only present if rate=1 and peak=1)
+specrate2017_fp_base: base, rate floating point score (only present if rate=1 and peak=0)
+specfp_text: [URL to the SPECfp text format report (if save.sh --store option used)]
+
+specspeed2017_int_peak: peak, speed integer score (only present if rate=0 and peak=1)
+specspeed2017_int_base: base, speed integer score (only present if rate=0 and peak=0)
+specint_csv: [URL to the SPECint CSV format report (if save.sh --store option used)]
+specint_gif: [URL to the SPECint HTML report GIF image (if save.sh --store option used)]
+specint_html: [URL to the SPECint HTML format report (if save.sh --store option used)]
+specint_pdf: [URL to the SPECint PDF format report (if save.sh --store option used)]
+specrate2017_int_peak: peak, rate integer score (only present if rate=1 and peak=1)
+specrate2017_int_base: base, rate integer score (only present if rate=1 and peak=0)
+specint_text: [URL to the SPECint text format report (if save.sh --store option used)]
+
+sse: sse optimization used (if applicable)
+sse_max
+sse_min
+test_started 
+test_stopped 
+tune: tune level - base, peak or all
+valid: 1 if this was a valid run (0 if invalid)
+validate_disk_space
+x64: true if 64-bit binaries used, false if 32-bit
+x64_failover
+
+
+USAGE
+# run 1 test iteration with some metadata
+./run.sh --meta_compute_service_id aws:ec2 --meta_instance_id c3.xlarge --meta_region us-east-1 --meta_test_id aws-0914
+
+# run with SPEC CPU 2017 installed in /usr/local/speccpu
+./run.sh --spec_dir /usr/local/speccpu
+
+# run for floating point benchmarks only
+./run.sh --benchmark fp
+
+# run for perlbench and bwaves only
+./run.sh --benchmark 500 --benchmark 505
+
+
+# save.sh saves results to CSV, MySQL, PostgreSQL, BigQuery or via HTTP 
+# callback. It can also save artifacts (text report ) to S3, Azure Blob Storage
+# or Google Cloud Storage
+
+# save results to CSV files
+./save.sh
+
+# save results from 5 iterations text example above
+./save.sh ~/spec-testing
+
+# save results to a PostgreSQL database
+./save --db postgresql --db_user dbuser --db_pswd dbpass --db_host db.mydomain.com --db_name benchmarks
+
+# save results to BigQuery and artifact (TRIAD gnuplot PNG image) to S3
+./save --db bigquery --db_name benchmark_dataset --store s3 --store_key THISIH5TPISAEZIJFAKE --store_secret thisNoat1VCITCGggisOaJl3pxKmGu2HMKxxfake --store_container benchmarks1234
+

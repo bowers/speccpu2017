@@ -1,0 +1,13 @@
+# Ubuntu
+sudo apt-get -y install php5-cli numactl
+git clone git://github.com/cloudharmony/speccpu2017.git
+
+
+# CentOS
+sudo yum -y install php-cli numactl
+git clone git://github.com/cloudharmony/speccpu2017.git
+
+
+# Setup BigQuery (see save.sh)
+curl https://sdk.cloud.google.com | bash
+gcloud auth login

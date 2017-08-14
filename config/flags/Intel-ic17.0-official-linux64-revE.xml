@@ -1,0 +1,1258 @@
+<?xml version="1.0"?>
+<!DOCTYPE flagsdescription SYSTEM "http://www.spec.org/dtd/cpuflags2.dtd">
+<flagsdescription>
+
+<!--
+######################################################################################################
+       This file is centrally maintained.  You should not have
+       to edit it; if you see a need for improvements, please
+       write to SPEC CPU technical support (see
+       http://www.spec.org/cpu2006/Docs/techsupport.html )
+
+       If you DO change it, you MUST change the filename tag
+       just below, or your changes may be lost!
+######################################################################################################
+-->
+
+<filename>Intel-ic17.0-official-linux64-revE</filename>
+
+<title>SPEC CPU2006/CPU2017 Flag Description for the Intel(R) C++ and Fortran Compiler 17.0
+for IA32 and Intel 64 applications </title>
+
+
+<!--
+******************************************************************************************************
+* Submit commands
+******************************************************************************************************
+-->
+
+<submit_command>
+<![CDATA[ 
+<dl>                 
+  <dt><b>submit= MYMASK=`printf '0x%x' $((1&lt;&lt;$SPECCOPYNUM))`; /usr/bin/taskset $MYMASK $command </b></dt>
+
+   <dd>When running multiple copies of benchmarks, the SPEC config file feature <b>submit</b> is used to cause individual jobs to be bound to 
+   specific processors. This specific submit command, using taskset, is used for Linux64 systems without numactl. <br />
+   Here is a brief guide to understanding the specific command which will be found in the config file: 
+	 <ul>
+	 <li><b>/usr/bin/taskset [options] [mask] [pid | command [arg] ... ]</b>: <br/>
+       	 taskset is used to set or retreive the CPU affinity of a running 
+         process given its PID or to launch a new COMMAND with a given CPU 
+         affinity. The CPU affinity is represented as a bitmask, with the 
+         lowest order bit corresponding to the first logical CPU and highest
+         order bit corresponding to the last logical CPU. When the taskset 
+         returns, it is guaranteed that the given program has been scheduled
+         to a specific, legal CPU, as defined by the mask setting.</li>
+	 <li><b>[mask]</b>: The bitmask (in hexadecimal) corresponding to a specific
+         SPECCOPYNUM. The specific example above, computes this mask value in the variable $MYMASK. 
+         The value of this mask for the first copy of a 
+         rate run will be 0x00000001, for the second copy of the rate will 
+         be 0x00000002 etc. Thus, the first copy of the rate run will have a
+         CPU affinity of CPU0, the second copy will have the affinity CPU1 
+         etc.</li>
+	 <li><b>$command</b>: Program to be started, in this case, the benchmark instance to be started.</li>
+	 </ul> 
+    </dd>
+
+  <dt><b>submit= numactl --localalloc --physcpubind=$SPECCOPYNUM $command </b></dt>
+   <dd> When running multiple copies of benchmarks, the SPEC config file feature <b>submit</b> is used to cause individual jobs to be bound to 
+   specific processors. This specific submit command is used for Linux64 systems with support for numactl. <br />
+   Here is a brief guide to understanding the specific command which will be found in the config file: 
+	 <ul>
+         <li>syntax: numactl [--interleave=nodes] [--preferred=node] [--physcpubind=cpus] [--cpunodebind=nodes] [--membind=nodes] [--localalloc] command args ...</li>
+         <li>numactl runs processes with a specific NUMA scheduling or memory placement policy.  The policy is set for a command and inherited by all of its children. </li> 
+         <li>"--localalloc" instructs numactl to keep a process memory on the local node while "-m" specifies which node(s) to place a process memory.  </li>
+         <li>"--physcpubind" specifies which core(s) to bind the process. In this case, copy 0 is bound to processor 0 etc.</li>
+         <li> For full details on using numactl, please refer to your Linux documentation, 'man numactl'</li>
+       </ul> 
+   </dd>
+</dl>
+
+
+]]> 
+</submit_command>
+
+<!--
+******************************************************************************************************
+* S/W Environment
+******************************************************************************************************
+-->
+
+<sw_environment>
+<![CDATA[
+
+<dl>
+  <dt><b>numactl --interleave=all "runspec command" </b></dt>
+   <dd> Launching a process with numactl --interleave=all sets the memory interleave policy so that memory will be allocated using round robin on nodes. 
+   When memory cannot be allocated on the current interleave target fall back to other nodes.</dd>
+
+  <dt><b>KMP_STACKSIZE </b></dt>
+  <dd> Specify stack size to be allocated for each thread.  </dd>
+  
+  <dt><b>KMP_AFFINITY</b></dt>
+  <dd>Syntax: KMP_AFFINITY=[&#60;modifier&#62;,...]&#60;type&#62;[,&#60;permute&#62;][,&#60;offset&#62;]<br/>
+  The value for the environment variable KMP_AFFINITY affects how the threads from an auto-parallelized program are scheduled across processors. <br/>
+  It applies to binaries built with -qopenmp and -parallel (Linux and Mac OS X) or /Qopenmp and /Qparallel (Windows). <br/>
+  modifier:<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>granularity=fine</i> Causes each OpenMP thread to be bound to a single thread context.<br/>
+  type:<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>compact</i> Specifying compact assigns the OpenMP thread &lt;n&gt;+1 to a free thread context as close as possible to the thread context where the &lt;n&gt; OpenMP thread was placed.<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>scatter</i>  Specifying scatter distributes the threads as evenly as possible across the entire system.<br/>
+  permute: The permute specifier is an integer value controls which levels are most significant when sorting the machine topology map. A value for permute forces the mappings to make the specified number of most significant levels of the sort the least significant, and it inverts the order of significance.<br/>
+  offset: The offset specifier indicates the starting position for thread assignment.<br/><br/>
+  
+  <b>Please see the <i>Thread Affinity Interface</i> article in the Intel Composer XE Documentation for more details.</b> <br/><br/></dd>
+  
+  <dd>Example: <b>KMP_AFFINITY=granularity=fine,scatter </b><br/>
+	Specifying granularity=fine selects the finest granularity level and causes each OpenMP or auto-par thread to be bound to a single thread context. <br/>
+  This ensures that there is only one thread per core on cores supporting HyperThreading Technology<br/>
+  Specifying scatter distributes the threads as evenly as possible across the entire system. <br/> 
+  Hence a combination of these two options, will spread the threads evenly across sockets, with one thread per physical core. <br/><br/> </dd>
+  <dd>Example: <b>KMP_AFFINITY=compact,1,0</b><br/>
+	Specifying <b><i>compact</i></b> will assign the n+1 thread to a free thread context as close as possible to thread n. <br/> 
+	A default granularity=core is implied if no granularity is explicitly specified. <br/>
+  Specifying <i>1,0</i> sets permute and offset values of the thread assignment. <br/>
+  With a permute value of 1, thread n+1 is assigned to a consecutive core. With an offset of 0, the process's first thread 0 will be assigned to thread 0.<br/> 
+  The same behavior is exhibited in a multisocket system.</dd>
+  
+  <dt><b>OMP_NUM_THREADS </b></dt>
+  <dd>Sets the maximum number of threads to use for OpenMP* parallel regions if no 
+  other value is specified in the application. This environment variable 
+  applies to both -qopenmp and -parallel (Linux and Mac OS X) or /Qopenmp and /Qparallel (Windows).
+  Example syntax on a Linux system with 8 cores:
+  export OMP_NUM_THREADS=8 </dd>
+
+  <dt><b>Set stack size to unlimited</b></dt>
+  <dd>The command "ulimit -s unlimited" is used to set the stack size limit to unlimited.   
+  </dd>
+
+  <dt><b>Free the file system page cache</b></dt>
+  <dd>The command "echo 1>       /proc/sys/vm/drop_caches" is used to free up the filesystem page cache.   
+  </dd>
+</dl>
+
+<h3> Red Hat Specific features </h3>
+
+<dl>
+  <dt><b>Transparent Huge Pages</b></dt>
+  <dd>On RedHat EL 6 and later, Transparent Hugepages increase the memory page size from 4 kilobytes to 2 megabytes. Transparent Hugepages provide significant performance advantages on systems with highly contended resources and large memory workloads. 
+  If memory utilization is too high or memory is badly fragmented which prevents hugepages being allocated, the kernel will assign smaller 4k pages instead. <br/>
+
+  Hugepages are used by default unless the /sys/kernel/mm/redhat_transparent_hugepage/enabled field is changed from its RedHat EL6 default of 'always'.   
+  </dd>
+</dl>
+
+]]>
+</sw_environment>
+
+<header>
+<![CDATA[
+<p style="text-align: left; color: red; font-size: larger; background-color: black">
+ Copyright &copy; 2016 Intel Corporation.  All Rights Reserved.</p>
+]]>
+</header>
+
+<!--
+******************************************************************************************************
+* Compilers
+******************************************************************************************************
+-->
+
+<flag name="intel_icc" class="compiler" regexp="(?=\s|^)icc.* -m32 .*(?=\s|$)">
+
+   <![CDATA[
+      <p> Invoke the Intel C compiler 17.0 for IA32 applications when the environment is set for Intel 64 compilation. Defaults to -std=gnu89. Conforms to ISO C90 plus GNU extensions.</p>
+   ]]>
+
+</flag>
+
+<flag name="intel_icc_c11" class="compiler" regexp="(?=\s|^)icc.* -m32 .*-std=c11 .*(?=\s|$)">
+
+   <![CDATA[
+      <p> Invoke the Intel C compiler 17.0 for IA32 applications when the environment is set for Intel 64 compilation. Conforms to ISO C11.</p>
+   ]]>
+
+</flag>
+
+<flag name="intel_icpc" class="compiler" regexp="(?=\s|^)icpc.* -m32 .*(?=\s|$)">
+
+   <![CDATA[
+      <p> Invoke the Intel C++ compiler 17.0 for IA32 applications when the environment is set for Intel 64 compilation.</p>
+   ]]>
+
+</flag>
+
+<flag name="intel_ifort" class="compiler" regexp="(?=\s|^)ifort.* -m32 .*(?=\s|$)">
+
+   <![CDATA[
+      <p> Invoke the Intel Fortran compiler 17.0 for IA32 applications when the environment is set for Intel 64 compilation.</p>
+   ]]>
+
+</flag>
+
+<flag name="intel_icc_64bit_c11" class="compiler" regexp="icc.* -m64 .*-std=c11(?=\s|$)">
+
+   <![CDATA[
+      <p>Invoke the Intel C compiler 17.0 for Intel 64 applications. Conforms to ISO C11.</p>
+   ]]>
+
+</flag>
+
+<flag name="intel_icc_64bit" class="compiler" regexp="icc.* -m64(?=\s|$)">
+
+   <![CDATA[
+      <p>Invoke the Intel C compiler 17.0 for Intel 64 applications.</p>
+   ]]>
+
+</flag>
+
+<flag name="intel_icpc_64bit" class="compiler" regexp="icpc.* -m64(?=\s|$)">
+
+   <![CDATA[
+      <p>Invoke the Intel C++ compiler 17.0 for Intel 64 applications </p>
+   ]]>
+
+</flag>
+
+<flag name="intel_ifort_64bit" class="compiler" regexp="(?=\s|^)ifort.* -m64(?=\s|$)">
+
+   <![CDATA[
+      <p> Invoke the Intel Fortran compiler 17.0 for Intel 64 applications.</p>
+   ]]>
+
+</flag>
+
+
+<!--
+******************************************************************************************************
+* Portability
+******************************************************************************************************
+-->
+
+<flag name="convert_big_endian" class="portability" regexp="-convert big_endian(?=\s|$)">
+<example>Specifies the format of unformatted files containing numeric data.</example>
+
+   <![CDATA[
+      <p>Specifies  that  the  format  will  be big endian for INTEGER*1, INTEGER*2, INTEGER*4, or INTEGER*8, and big endian IEEE floating-point for REAL*4, REAL*8, REAL*16, COMPLEX*8, 
+      COMPLEX*16, or COMPLEX*32.</p>
+   ]]>
+
+</flag>
+
+<flag name="assume_byterecl" class="portability" regexp="-assume byterecl(?=\s|$)">
+<example>Specifies the format of unformatted files containing numeric data.</example>
+
+   <![CDATA[
+      <p>Specifies that the units for the OPEN statement RECL specifier (record length) value are in bytes for unformatted data files, not longwords (four-byte units). For formatted files, the RECL value is
+      always in bytes.</p>
+   ]]>
+
+</flag>
+
+<flag name="force_uchar" class="portability" regexp="-funsigned-char(?=\s|$)">
+
+   <![CDATA[
+      <p>Change default char type to unsigned.</p>
+   ]]>
+
+</flag>
+
+<flag name="file_offset_bits_64" class="portability" regexp="(?:/\S+/)?-D_FILE_OFFSET_BITS=64(?=\s|$)">
+
+   <![CDATA[
+      <p>This macro determines which file system interface will be used. Common file i/o calls like stat()
+      and readdir() return off_t data that may or may not fit within a 32bit data structure if this flag
+      is not used. With _FILE_OFFSET_BITS=64, types like off_t have a size of 64 bits. The truncation that 
+      happens without _FILE_OFFSET_BITS=64 has been observed to yield intermittent failures.</p>
+      <p>Ex: RHEL7 distributions format partitions using xfs. Runtime errors are observed on such systems because
+      sometimes returned values will not fit into 32bit data types that are a mismatch for xfs.</p>
+      <p>See the gnuc feature test macros article for more information.</p>
+   ]]>
+
+</flag>
+
+<flag name="lowercase_routine_name" class="portability" regexp="(?:/\S+/)?-Qlowercase(?=\s|$)">
+
+   <![CDATA[
+      <p>For mixed-language benchmarks, tell the compiler to convert routine names to 
+      lowercase for compatibility</p>
+   ]]>
+
+</flag>
+
+<flag name="add-underscore_to_routine_name" class="portability" regexp="(?:/\S+/)?\/assume\:underscore(?=\s|$)">
+
+   <![CDATA[
+      <p>For mixed-language benchmarks, tell the compiler to assume that routine 
+      names end with an underscore</p>
+   ]]>
+
+</flag>
+
+<flag name="assume_cplusplus_sources" class="portability" regexp="(?:/\S+/)?-TP(?=\s|$)">
+      Tell the compiler to treat source files as C++ regardless of the file extension
+</flag>
+
+<!--
+******************************************************************************************************
+* Optimizations
+******************************************************************************************************
+-->
+
+<flag name="qopenmp" class="optimization" regexp="-qopenmp(?=\s|$)" parallel="yes" >
+<example>Enable the compiler to generate multi-threaded code based on the OpenMP* directives. Similar behavior was granted by -openmp in previous versions.</example>
+</flag>
+
+<flag name="f_2003_std_realloc" class="optimization" regexp="-nostandard-realloc-lhs(?=\s|$)">
+<example>Determines whether the compiler uses the current Fortran Standard rules or the old Fortran 2003 rules when interpreting assignment statements.</example>
+
+   <![CDATA[
+      <p>Option standard-realloc-lhs (the default), tells the compiler that when the left-hand side of an assignment is an allocatable object, it should be reallocated to the shape of the
+      right-hand  side  of  the assignment before the assignment occurs. This is the current Fortran Standard definition. This feature may cause extra overhead at run time. This option has
+      the same effect as option assume realloc_lhs.</p>
+
+      <p>If you specify nostandard-realloc-lhs, the compiler uses the old Fortran 2003 rules when interpreting assignment statements. The left-hand side is assumed to be allocated with the 
+      correct shape to hold the right-hand side. If it is not, incorrect behavior will occur. This option has the same effect as option assume norealloc_lhs.</p>
+   ]]>
+
+</flag>
+
+<flag name="link_for_large_pages_64bit" class="optimization" regexp="-B.*/usr/share/libhugetlbfs/.*-Wl,-melf_x86_64.*-Wl,-hugetlbfs-link=BDT(?=\s|$)">
+<example>Link 64-bit applications to use large pages</example>
+
+   <![CDATA[
+      <p>Linker options to link a 64-bit application to use large pages for the .bss, .data and .text sections.</p>
+   ]]>
+
+</flag>
+
+<flag name="link_for_large_pages_32bit" class="optimization" regexp="-B.*/usr/share/libhugetlbfs/ -Wl,-hugetlbfs-link=BDT(?=\s|$)">
+<example>Link 32-bit applications to use large pages</example>
+
+   <![CDATA[
+      <p>Linker options to link a 32-bit application to use large pages for the .bss, .data and .text sections.</p>
+   ]]>
+
+</flag>
+
+<flag name="f-O1" class="optimization" regexp="-O1(?=\s|$)">
+      
+   <![CDATA[
+      <p>Enables optimizations for speed and disables some optimizations that increase code size and affect speed. <br />
+         To limit code size, this option: </p>
+         <ul>
+         <li> Enables global optimization; this includes data-flow analysis, 
+           code motion, strength reduction and test replacement, split-lifetime
+           analysis, and instruction scheduling. </li>
+         <li> Disables intrinsic recognition and intrinsics inlining. </li>
+         </ul>
+  
+         <p> The O1 option may improve performance for applications with very large 
+         code size, many branches, and execution time not dominated by code within loops. </p>
+         
+         -O1 sets the following options:<br />
+         -funroll-loops0, -fno-builtin, -mno-ieee-fp, -fomit-framepointer, -ffunction-sections, -ftz
+   ]]>
+
+   <include flag="f-funroll-loops"/>
+   <include flag="f-fno-builtin"/>
+   <include flag="f-mno-ieee-fp"/>
+   <include flag="f-fomit-framepointer"/>
+   <include flag="f-ffunction-sections"/>
+   <include flag="f-ftz"/>
+   
+</flag>
+
+<flag name="f-O2" class="optimization" regexp="-O2(?=\s|$)">
+
+   <![CDATA[
+      <p>Enables optimizations for speed. This is the generally recommended 
+      optimization level. This option also enables: <br />
+      - Inlining of intrinsics<br />
+      - Intra-file interprocedural optimizations, which include: <br />
+        - inlining<br />
+        - constant propagation<br />
+        - forward substitution<br />
+        - routine attribute propagation<br />
+        - variable address-taken analysis<br />
+        - dead static function elimination<br />
+        - removal of unreferenced variables<br />
+      - The following capabilities for performance gain: <br /> 
+        - constant propagation<br />
+        - copy propagation<br />
+        - dead-code elimination<br />
+        - global register allocation<br />
+        - global instruction scheduling and control speculation<br />
+        - loop unrolling<br />
+        - optimized code selection<br />
+        - partial redundancy elimination<br />
+        - strength reduction/induction variable simplification<br />
+        - variable renaming<br />
+        - exception handling optimizations<br />
+        - tail recursions<br />
+        - peephole optimizations<br />
+        - structure assignment lowering and optimizations<br />
+        - dead store elimination<br />
+      </p>
+
+   ]]> 
+
+   <include flag="f-O1"/> 
+</flag>
+
+<flag name="f-O3" class="optimization" regexp="-O3(?=\s|$)">
+
+   <![CDATA[
+      <p>Enables O2 optimizations plus more aggressive optimizations, 
+         such as prefetching, scalar replacement, and loop and memory 
+         access transformations. Enables optimizations for maximum speed,   
+         such as: </p>
+         <ul>
+         <li> Loop unrolling, including instruction scheduling </li>
+         <li> Code replication to eliminate branches</li>
+         <li> Padding the size of certain power-of-two arrays to allow 
+           more efficient cache use.</li>
+         </ul> <br/>
+         <p>
+         On IA-32 and Intel EM64T processors, when O3 is used with options 
+         -ax or -x (Linux) or with options /Qax or /Qx (Windows), the compiler 
+         performs more aggressive data dependency analysis than for O2, which 
+         may result in longer compilation times. 
+         The O3 optimizations may not cause higher performance unless loop and 
+         memory access transformations take place. The optimizations may slow 
+         down code in some cases compared to O2 optimizations.  
+         The O3 option is recommended for applications that have loops that heavily 
+         use floating-point calculations and process large data sets. </p>
+   ]]> 
+
+   <include flag="f-O2"/>
+
+</flag>
+
+<flag name="f-funroll-loops" class="optimization" regexp="-funroll-loops\d+(?=\s|$)">
+      Tells the compiler the maximum number of times to unroll loops. For example -funroll-loops0 would
+      disable unrolling of loops.  
+</flag>
+
+
+
+<flag name="f-fno-builtin" class="optimization" regexp="-fno-builtin(?=\s|$)">
+ -fno-builtin disables inline expansion for all intrinsic functions.
+</flag>
+
+<flag name="f-mno-ieee-fp" class="optimization" regexp="-f-mno-ieee-fp(?=\s|$)">
+ This option trades off floating-point precision for speed by removing 
+the restriction to conform to the IEEE standard. 
+</flag>
+
+<flag name="f-fomit-framepointer" class="optimization" regexp="-fomit-framepointer(?=\s|$)">
+  EBP is used as a general-purpose register in optimizations.       
+</flag>
+
+<flag name="f-ffunction-sections" class="optimization" regexp="-ffunction-sections(?=\s|$)">
+  Places each function in its own COMDAT section.     
+</flag>
+
+<flag name="f-ftz" class="optimization" regexp="-ftz(?=\s|$)">
+ Flushes denormal results to zero.      
+</flag>
+
+<flag name="f-qopt-mem-layout-trans" class="optimization" regexp="-qopt-mem-layout-trans=(\d+)(?=\s|$)">
+ <example>-qopt-mem-trans=3</example>
+ <ex_replacement>3</ex_replacement>
+ <![CDATA[
+ <p> Controls the level of memory layout transformations performed by the compiler. This option can improve cache reuse and cache locality.</p>
+ <ul>
+  <li>0:  Disables  memory  layout  transformations. This is the same as specifying -qno-opt-mem-layout-trans  </li>
+  <li>1:  Enables basic memory layout transformations like structure splitting, structure peeling, field inlining, field reordering, array field transpose, increase field alignment etc. </li>
+  <li>2:  Enables more memory  layout  transformations like advanced structure splitting. This is the same as specifying -qopt-mem-layout-trans </li>
+  <li>3:  Compiler is more aggressive in using memory layout transformations. You should only use this setting if your system has more than 4GB of physical memory per core. </li>
+ </ul> 
+ ]]>
+</flag>
+
+<flag name="f-unroll" class="optimization" regexp="-unroll(\d+)(?=\s|$)">
+
+<example>-unroll&lt;n&gt;</example> 
+This option sets the maximum number of times a loop can be unrolled, to $1.
+
+<ex_replacement> n. For example, -unroll1 will unroll loops just once. To disable loop unrolling, use -unroll0. </ex_replacement>
+
+</flag>
+
+<flag name="f-par-schedule" class="optimization" parallel="yes" regexp="-par-schedule-static\=(\d+)(?=\s|$)">
+   <![CDATA[
+<p>The -par-schedule option lets you specify a scheduling algorithm or a tuning method for loop iterations.<br /> 
+It specifies how iterations are to be divided among the threads of the team. This option affects performance <br />
+tuning and can provide better performance during auto-parallelization.</p>
+   ]]> 
+
+<example>-par-schedule-static=n</example>
+   <![CDATA[
+-par-scheudle-static=n tells the compiler to divide iterations into contiguous pieces (chunks) of size n. <br />
+The chunks are assigned to threads in the team in a round-robin fashion in the order of the thread number. <br />
+Note that the last chunk to be assigned may have a smaller number of iterations. If n is not specified, <br />
+the iteration space is divided into chunks that are approximately equal in size, and each thread is assigned at most one chunk.<br />
+   ]]> 
+
+<ex_replacement> n. For example, -par-schedule-static=32768 will split iterations into chunks of size 32768. </ex_replacement>
+
+</flag>
+
+<flag name="f-ip" class="optimization" regexp="-ip(?=\s|$)">
+This option enables additional interprocedural optimizations for single 
+file compilation. These optimizations are a subset of full intra-file 
+interprocedural optimizations. One of these optimizations enables the 
+compiler to perform inline function expansion for calls to functions 
+defined within the current source file.
+</flag>
+
+<flag name="f-ipo" class="optimization" regexp="-ipo(?=\s|$)">
+   <![CDATA[
+      <p>Multi-file ip optimizations that includes:<br />
+       - inline function expansion<br />
+       - interprocedural constant propogation<br />
+       - dead code elimination<br />
+       - propagation of function characteristics<br />
+       - passing arguments in registers<br />
+       - loop-invariant code motion</p>
+   ]]> 
+</flag>
+
+<flag name="f-auto-ilp32" class="optimization" regexp="-auto-ilp32(?=\s|$)">
+   <![CDATA[
+<p>This option instructs the compiler to analyze and transform the program so that 
+64-bit pointers are shrunk to 32-bit pointers, and 64-bit longs (on Linux) are 
+shrunk into 32-bit longs wherever it is legal and safe to do so. 
+In order for this option to be effective the compiler must be able to optimize using 
+the -ipo/-Qipo option and must be able to analyze all library/external calls the program makes. </p>
+
+<p>This option requires that the size of the program executable never exceeds 2^32 bytes and all 
+data values can be represented within 32 bits. If the program can run correctly in a 32-bit system, 
+these requirements are implicitly satisfied. If the program violates these size restrictions, 
+unpredictable behavior might occur.</p>
+   ]]> 
+</flag>
+
+<flag name="f-auto-p32" class="optimization" regexp="-auto-p32(?=\s|$)">
+   <![CDATA[
+<p>This option instructs the compiler to analyze and transform the program so that 
+64-bit pointers are shrunk to 32-bit pointers wherever it is legal and safe to do so. 
+In order for this option to be effective, the compiler must optimize using 
+the -ipo option and must be able to analyze all library/external calls the program makes. 
+This option has no effect unless you specify setting SSE3 or higher for option -x. </p>
+
+<p>This option requires that the application cannot exceed a 32-bit address space, otherwise 
+unpredictable results can occur.</p>
+   ]]> 
+</flag>
+
+
+
+<flag name="f-nofor_main" class="portability" regexp="-nofor_main(?=\s|$)">
+   <![CDATA[
+<p>This option specifies that the main program is not written in Fortran. 
+It is a link-time option that prevents the compiler from linking for_main.o 
+into applications. </p>
+
+<p>For example, if the main program is written in C and calls a Fortran subprogram, 
+specify -nofor-main when compiling the program with the ifort command. 
+If you omit this option, the main program must be a Fortran program.</p>
+   ]]> 
+</flag>
+
+
+<flag name="f-disablescalarrep" class="optimization" regexp="-scalar-rep-">
+<example>Disable scalar replacement</example>
+   <![CDATA[
+<p> -scalar-rep enables scalar replacement performed during loop transformation. 
+To use this option, you must also specify O3. -scalar-rep- disables this optimization. </p>
+   ]]> 
+</flag>
+
+
+<flag name="f-no-alias" class="optimization" regexp="-fno-alias(?=\s|$)">
+   <![CDATA[
+<p> This options tells the compiler to assume no aliasing in the program. </p>
+   ]]> 
+</flag>
+
+<flag name="f-fast" class="optimization" regexp="-fast(?=\s|$)">
+
+   <![CDATA[
+      <p>The -fast option enhances execution speed across the entire program 
+      by including the following options that can improve run-time performance:</p>
+
+      <p style="text-indent: -45px;margin-left: 45px">
+      -O3&nbsp;&nbsp;&nbsp;(maximum speed and high-level optimizations)</p>
+      <p style="text-indent: -45px;margin-left: 45px"> 
+      -ipo&nbsp;(enables interprocedural optimizations across files)</p>
+      <p style="text-indent: -45px;margin-left: 45px">  
+      -xT&nbsp;&nbsp;(generate code specialized for Intel(R) Core(TM)2 Duo processors, Intel(R) Core(TM)2 Quad processors 
+                      and  Intel(R) Xeon(R) processors with SSSE3)</p>
+      <p style="text-indent: -45px;margin-left: 45px"> 
+      -static&nbsp;
+             Statically link in libraries at link time</p>
+      <p style="text-indent: -45px;margin-left: 45px"> 
+      -no-prec-div&nbsp;(disable -prec-div)
+             where -prec-div improves precision of FP divides (some speed impact)</p>
+   
+      <p>To override one of the options set by /fast, specify that option after the 
+      -fast option on the command line. The exception is the xT or QxT option
+      which can't be overridden. The options set by /fast may change from 
+      release to release.</p>
+   ]]> 
+
+   <include flag="f-O3"/>
+   <include flag="f-ipo"/>
+   <include flag="f-xT"/>
+   <include flag="f-static"/>
+   <include flag="f-no-prec-div"/>
+</flag>
+
+<flag name="f-static" class="optimization" regexp="-static(?=\s|$)">
+         	 Compiler option to statically link in libraries at link time
+</flag>
+
+<flag name="f-xT" class="optimization" regexp="-xT(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) Core(TM)2 Duo processors, Intel(R) Core(TM)2 Quad 
+      processors and Intel(R) Xeon(R) processors with SSSE3. 
+      The resulting code may contain unconditional use of features that are not supported 
+      on other processors. This option also enables new optimizations in addition to 
+      Intel processor-specific optimizations including advanced data layout and code 
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that 
+      is not an Intel processor. If you use this option on a non-compatible processor 
+      to compile the main program (in Fortran) or the function main() in C/C++, the 
+      program will display a fatal run-time error if they are executed on unsupported 
+      processors. </p>
+
+   ]]> 
+
+</flag>
+
+<flag name="f-xSSE3ATOM" class="optimization" regexp="-xSSE3_ATOM(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) Atom processors with support for MOVBE instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-xSSSE3ATOM" class="optimization" regexp="-xSSSE3_ATOM(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) Atom processors with support for MOVBE instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-xCORE-AVX2" class="optimization" regexp="-xCORE-AVX2(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) processors with support for AVX2 instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-xHost" class="optimization" regexp="(?i)[/-]xHost(?=\s|$)">
+
+   <![CDATA[
+      <p>This option tells the compiler to generate instructions for the highest instruction set available on the compilation host processor. 
+         The instructions generated by Host differ depending on the compilation host processor.
+      </p>
+   ]]>
+
+</flag>
+
+<flag name="f-xATOM_SSE4.2" class="optimization" regexp="-xATOM_SSE4.2(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) Atom(TM) processors that support SSE4.2
+      and MOVBE instructions.  The resulting code may contain unconditional use of
+      features that are not supported on other processors. This option also enables
+      new optimizations in addition to Intel processor-specific optimizations
+      including advanced data layout and code restructuring optimizations to improve
+      memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor
+      that is not an Intel processor. If you use this option on a non-compatible
+      processor to compile the main program (in Fortran) or the function main() in
+      C/C++, the program will display a fatal run-time error if they are executed on
+      unsupported processors.  </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-xATOM_SSSE3" class="optimization" regexp="-xATOM_SSSE3(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) Atom(TM) processors that support
+      Intel(R) SSE3 and MOVBE instructions.  and MOVBE instructions.  The resulting
+      code may contain unconditional use of features that are not supported on other
+      processors. This option also enables new optimizations in addition to Intel
+      processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor
+      that is not an Intel processor. If you use this option on a non-compatible
+      processor to compile the main program (in Fortran) or the function main() in
+      C/C++, the program will display a fatal run-time error if they are executed on
+      unsupported processors.  </p>
+
+   ]]>
+
+</flag>
+<flag name="f-xCORE-AVX512" class="optimization" regexp="-xCORE-AVX512(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) processors with support for CORE-AVX512 instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+
+<flag name="f-xCOMMON-AVX512" class="optimization" regexp="-xCOMMON-AVX512(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) processors with support for COMMON-AVX512 instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+
+<flag name="f-xMIC-AVX512" class="optimization" regexp="-xMIC-AVX512(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) processors with support for MIC-AVX512 instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-xAVX" class="optimization" regexp="-xAVX(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) processors with support for AVX instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-xSSE42" class="optimization" regexp="-xSSE4.2(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) processors with support for SSE 4.2 instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-xSSE41" class="optimization" regexp="-xSSE4.1(?=\s|$)">
+
+   <![CDATA[
+
+      <p>Code is optimized for Intel(R) processors with support for SSE 4.1 instructions.
+      The resulting code may contain unconditional use of features that are not supported
+      on other processors. This option also enables new optimizations in addition to
+      Intel processor-specific optimizations including advanced data layout and code
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+
+      <p> Do not use this option if you are executing a program on a processor that
+      is not an Intel processor. If you use this option on a non-compatible processor
+      to compile the main program (in Fortran) or the function main() in C/C++, the
+      program will display a fatal run-time error if they are executed on unsupported
+      processors. </p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-msse3" class="optimization" regexp="-msse3(?=\s|$)">
+
+   <![CDATA[
+
+      <p>This option tells the compiler to generate code specialized for processors that support for SSE3 instructions.
+      Code generated with these options should execute on any compatible, non-Intel processor with support for the SSE3 instruction set.</p>
+
+   ]]>
+
+</flag>
+
+<flag name="f-QxB" class="optimization" regexp="-QxB(?=\s|$)">
+
+    <![CDATA[       
+      <p>Code is optimized for Intel Pentium M and compatible Intel processors. The 
+      resulting code may contain unconditional use of features that are not supported 
+      on other processors. This option also enables new optimizations in addition to 
+      Intel processor-specific optimizations including advanced data layout and code 
+      restructuring optimizations to improve memory accesses for Intel processors.</p>
+     
+      <p> Do not use this option if you are executing a program on a processor that 
+      is not an Intel processor. If you use this option on a non-compatible processor 
+      to compile the main program (in Fortran) or the function main() in C/C++, the 
+      program will display a fatal run-time error if they are executed on unsupported 
+      processors. </p>
+
+    ]]> 
+  
+</flag>
+
+<flag name="f-QxW" class="optimization" regexp="-QxW(?=\s|$)">
+
+    <![CDATA[       
+      <p>Code is optimized for Intel Pentium 4 and compatible Intel processors; 
+      this is the default for Intel?EM64T systems. The resulting code may contain 
+      unconditional use of features that are not supported on other processors. </p>
+     
+    ]]> 
+  
+</flag>
+
+<flag name="f-parallel" class="optimization" regexp="-parallel(?=\s|$)" parallel="yes">
+
+    <![CDATA[       
+      <p>Tells the auto-parallelizer to generate multithreaded code for loops that can be safely executed in parallel.
+      To use this option, you must also specify option O2 or O3. The default numbers of threads spawned is equal to 
+      the number of processors detected in the system where the binary is compiled. Can be changed by setting the 
+      environment variable OMP_NUM_THREADS </p>
+     
+    ]]> 
+  
+</flag>
+
+
+<flag name="f-libguide40.lib" class="optimization" parallel="yes" regexp="libguide40.lib(?=\s|$)">
+<example> Runtime library for auto-parallelized code</example>
+    <![CDATA[       
+      <p>The use of -Qparallel to generate auto-parallelized code requires support libraries that are 
+      dynamically linked by default. Specifying libguide40.lib on the link line, statically links in 
+      libguide40.lib to allow auto-parallelized binaries to work on systems which do not have the 
+      dynamic version of this library installed.</p>
+     
+    ]]> 
+  
+</flag>
+
+
+
+<flag name="f-archSSE2" class="optimization" regexp="-arch\:SSE2(?=\s|$)">
+
+  <![CDATA[
+
+      <p> Optimizes for Intel Pentium 4 and compatible processors with Streaming SIMD Extensions 2 (SSE2).</p>
+
+  ]]>
+
+</flag>
+
+
+<flag name="f-no-prec-div" class="optimization" regexp="-no-prec.div">
+(disable/enable[default] -prec-div)
+                
+   <![CDATA[
+      <p>-no-prec-div enables optimizations that give slightly less precise results 
+         than full IEEE division. </p>
+
+      <p>When you specify -no-prec-div along with some optimizations, such as 
+         -xN and -xB (Linux) or /QxN and /QxB (Windows), 
+         the compiler may change floating-point division computations into 
+         multiplication by the reciprocal of the denominator. 
+         For example, A/B is computed as A * (1/B) to improve the speed of the 
+         computation.</p>
+      <p>However, sometimes the value produced by this transformation is 
+         not as accurate as full IEEE division. When it is important to have fully 
+         precise IEEE division, do not use -no-prec-div. 
+
+         This will enable the default -prec-div and the result will be more accurate, 
+         with some loss of performance.</p>
+   ]]> 
+
+</flag>
+
+
+<flag name="prof_gen" class="optimization" regexp="-prof-gen(:threadsafe)?(?=\s|$)">
+
+   <![CDATA[
+      <p>Instrument program for profiling for the first phase of
+      two-phase profile guided otimization. This instrumentation gathers information
+      about a program's execution paths and data values but does not gather
+      information from hardware performance counters. The profile instrumentation
+      also gathers data for optimizations which are unique to profile-feedback
+      optimization.</p>
+      <p>-profgen:threadsafe option collects profile guided optimization data with 
+      guards for threaded applications.</p>
+   ]]> 
+
+</flag>
+
+<flag name="par_num_threads" class="optimization" parallel="yes" regexp="-par-num-threads=\d+(?=\s|$)">
+
+   <![CDATA[
+      <p>Allows for tuning of application performance by setting the number of threads
+      to use in a parallel region. It has a similar effect as environment variable
+      OMP_NUM_THREADS. This option overrides the environment variable when both are 
+      specified. Ex: -par-num-threads=1 specifies one thread to use.</p>
+   ]]> 
+
+</flag>
+
+<flag name="prof_use" class="optimization" regexp="-prof-use(?=\s|$)">
+
+   <![CDATA[
+      <p>Instructs the compiler to produce a profile-optimized 
+      executable and merges available dynamic information (.dyn) 
+      files into a pgopti.dpi file. If you perform multiple 
+      executions of the instrumented program, -prof-use merges 
+      the dynamic information files again and overwrites the 
+      previous pgopti.dpi file.<br />
+      Without any other options, the current directory is 
+      searched for .dyn files</p>
+   ]]> 
+      
+</flag>
+
+<flag name="link_force_multiple1" class="optimization" regexp="-Wl\,-z\,muldefs(?=\s|$)">
+<example> Force linker to ignore multiple definitions</example>
+
+   <![CDATA[
+      <p>Enable SmartHeap and/or other library usage by forcing the linker to 
+      ignore multiple definitions if present</p>
+   ]]> 
+ 
+</flag>
+
+<flag name="SmartHeap64" class="optimization" regexp="-L\S+\s+-lsmartheap64(?=\s|$)">
+<example>64-bit version of the Smartheap library</example>
+
+   <![CDATA[
+      <p>MicroQuill SmartHeap Library (64-bit) available from http://www.microquill.com/</p>
+   ]]> 
+
+</flag>
+
+<flag name="SmartHeap" class="optimization" regexp="-L\S+\s+-lsmartheap(?=\s|$)">
+<example>32-bit version of the Smartheap library</example>
+
+   <![CDATA[
+      <p>MicroQuill SmartHeap Library (32-bit) available from http://www.microquill.com/</p>
+   ]]> 
+
+</flag>
+
+<flag name="Enable-64bit-compiler" class="optimization" regexp="-L/opt/intel/cce/[\d.]+/lib -I/opt/intel/cce/[\d.]+/include(?=\s|$)">
+<example>Directory for 64-bit files</example>
+
+   <![CDATA[
+      <p>Enable the use of the 64-bit compiler by passing the directory names for the library and include files</p>
+   ]]> 
+
+</flag>
+
+
+<flag name="set_stack_space" class="optimization" regexp="(?:/\S+/)?/F\d*">
+<example>Stack reserve amount</example>
+      set the stack reserve amount specified to the linker 
+</flag>
+
+<flag name="f-ansi-alias" class="optimization" regexp="-ansi-alias(?=\s|$)">
+      Enable/disable(DEFAULT) use of ANSI aliasing rules in
+      optimizations; user asserts that the program adheres to
+      these rules. 
+</flag>
+
+<flag name="f-qopt-prefetch" class="optimization" regexp="-qopt-prefetch(?=\s|$)">
+      Enable/disable(DEFAULT) the compiler to generate prefetch instructions to prefetch data. 
+</flag>
+
+<flag name="f-inline-calloc" class="optimization" regexp="-inline-calloc(?=\s|$)">
+      Directs the compiler to inline calloc() calls as malloc()/memset()
+</flag>
+
+
+<flag name="f-qopt-malloc-options" class="optimization" regexp="-qopt-malloc-options=\d(?=\s|$)">
+   <![CDATA[
+      <p>The compiler adds setup code in the C/C++/Fortran main function to enable optimal malloc algorithms:</p>
+      <ul>
+      <li> n=0: Default, no changes to the malloc options. No call to mallopt() is made. </li>
+      <li> n=1: M_MMAP_MAX=2 and M_TRIM_THRESHOLD=0x10000000. Call mallopt with the two settings. </li>
+      <li> n=2: M_MMAP_MAX=2 and M_TRIM_THRESHOLD=0x40000000. Call mallopt with these two settings. </li>
+      <li> n=3: M_MMAP_MAX=0 and M_TRIM_THRESHOLD=-1.    Call mallopt with these two settings. This 
+      will cause use of sbrk() calls instead of mmap() calls to get memory from the system. </li>
+      </ul>
+	  <p> The two parameters, M_MMAP_MAX and M_TRIM_THRESHOLD, are described below </p>
+
+      <p>Function: int mallopt (int param, int value) When calling mallopt, the param argument 
+      specifies the parameter to be set, and value the new value to be set. Possible choices 
+      for param, as defined in malloc.h, are: </p>
+      <ul>
+      <li> M_TRIM_THRESHOLD This is the minimum size (in bytes) of the top-most, releasable chunk 
+      that will cause sbrk to be called with a negative argument in order to return memory 
+      to the system. </li>
+      <li> M_TOP_PAD This parameter determines the amount of extra memory to obtain from the system 
+      when a call to sbrk is required. It also specifies the number of bytes to retain when 
+      shrinking the heap by calling sbrk with a negative argument. This provides the necessary 
+      hysteresis in heap size such that excessive amounts of system calls can be avoided. </li>
+      <li> M_MMAP_THRESHOLD All chunks larger than this value are allocated outside the normal heap, 
+      using the mmap system call. This way it is guaranteed that the memory for these chunks 
+      can be returned to the system on free. Note that requests smaller than this threshold 
+      might still be allocated via mmap. </li>
+	<li> M_MMAP_MAX The maximum number of chunks to allocate 
+      with mmap. Setting this to zero disables all use of mmap. </li>
+      </ul>
+      
+   ]]>
+</flag>
+
+
+<flag name="f-vec-guard-write" class="optimization" regexp="-vec-guard-write(?=\s|$)">
+      Enables cache/bandwidth optimization for stores under conditionals (within vector loops)
+      This option tells the compiler to perform a conditional check in a vectorized loop. 
+      This checking avoids unnecessary stores and may improve performance by conserving bandwidth.
+</flag>
+
+<flag name="f-par-runtime-control" class="optimization" regexp="-par-runtime-control(?=\s|$)" parallel="yes">
+      Enable compiler to generate runtime control code for effective automatic parallelization.
+      
+      This option generates code to perform run-time checks for loops that have symbolic loop bounds. 
+      If the granularity of a loop is greater than the parallelization threshold, the loop will be 
+      executed in parallel. If you do not specify this option, the compiler may not parallelize loops 
+      with symbolic loop bounds if the compile-time granularity estimation of a loop can not ensure 
+      it is beneficial to parallelize the loop.
+</flag>
+
+<flag name="f-qopt-ra-region-strategy" class="optimization" regexp="-qopt-ra-region-strategy.*(?=\s|$)">
+   <![CDATA[
+      <p>Select the method that the register allocator uses to partition
+      each routine into regions</p>
+      <ul>
+      <li>routine - one region per routine</li>
+      <li>block - one region per block</li>
+      <li>trace - one region per trace</li> 
+      <li>loop - one region per loop</li>
+      <li>default - compiler selects best option</li>
+      </ul>
+   ]]>
+</flag>
+
+
+<flag name="f-qopt-multi-version-aggressive" class="optimization" regexp="-qopt-multi-version-aggressive(?=\s|$)">
+      Multi-versioning is used for generating different versions of the loop based on  run time dependence testing,  
+      alignment and checking for short/long trip counts.  If this option is turned on, it will trigger more versioning 
+      at the expense of creating more overhead to check for pointer aliasing and scalar replacement.
+</flag>
+
+<flag name="f-auto" class="optimization" regexp="-auto(?=\s|$)">
+      Make all local variables AUTOMATIC. Same as -automatic
+</flag>
+
+<flag name="f-unroll-aggressive" class="optimization" regexp="-unroll-aggressive(?=\s|$)">
+      Enables more aggressive unrolling heuristics
+</flag>
+
+<flag name="f-qopt-streaming-stores" class="optimization" regexp="-qopt-streaming-stores.*(?=\s|$)">
+   <![CDATA[
+      <p>Specifies whether streaming stores are generated:</p>
+      <p>always - enables generation of streaming stores under the assumption that the application is memory bound</p>
+      <p>auto   - compiler decides when streaming stores are used (DEFAULT)</p>
+      <p>never  - disables generation of streaming stores</p>
+   ]]> 
+</flag>
+
+
+<flag name="f-Oi-" class="optimization" regexp="-Oi-">
+      Disables inline expansion of all intrinsic functions. 
+</flag>
+
+<flag name="f-Op-" class="optimization" regexp="-Op-(?=\s|$)">
+
+   <![CDATA[
+      <p>Disables conformance to the ANSI C and IEEE 754 standards for 
+      floating-point arithmetic.</p>
+   ]]> 
+ 
+</flag>
+
+<flag name="f-Oy" class="optimization" regexp="-Oy(?=\s|$)">
+      Allows use of EBP as a general-purpose register in optimizations.  
+</flag>
+
+<flag name="f-Os" class="optimization" regexp="-Os(?=\s|$)">
+
+   <![CDATA[
+      <p>This option enables most speed optimizations, but disables some 
+      that increase code size for a small speed benefit.</p>
+   ]]> 
+  
+</flag>
+
+<flag name="f-Og" class="optimization" regexp="-Og(?=\s|$)">
+      This option enables global optimizations.  
+</flag>
+
+<flag name="f-inline-level" class="optimization" regexp="-inline-level=(0|1|2)(?=\s|$)">
+
+   <![CDATA[
+      <p>Specifies the level of inline function expansion.</p>
+         
+         <p style="text-indent: -45px;margin-left: 45px">
+         0 - Disables inlining of user-defined functions. Note that 
+               statement functions are always inlined.</p>
+         <p style="text-indent: -45px;margin-left: 45px">
+         1 - Enables inlining when an inline keyword or an inline 
+               attribute is specified. Also enables inlining according 
+               to the C++ language.</p>
+         <p style="text-indent: -45px;margin-left: 45px">
+         2 - Enables inlining of any function at the compiler's 
+               discretion. </p>
+   ]]>
+
+</flag>
+
+<flag name="f-Ob_n" class="optimization" regexp="-Ob(0|1|2)(?=\s|$)">
+
+   <![CDATA[
+      <p>Specifies the level of inline function expansion.</p>
+         
+         <p style="text-indent: -45px;margin-left: 45px">
+         Ob0 - Disables inlining of user-defined functions. Note that 
+               statement functions are always inlined.</p>
+         <p style="text-indent: -45px;margin-left: 45px">
+         Ob1 - Enables inlining when an inline keyword or an inline 
+               attribute is specified. Also enables inlining according 
+               to the C++ language.</p>
+         <p style="text-indent: -45px;margin-left: 45px">
+         Ob2 - Enables inlining of any function at the compiler's 
+               discretion. </p>
+   ]]> 
+  
+</flag>
+
+<flag name="f-Gy" class="optimization" regexp="-Gy(?=\s|$)">
+
+   <![CDATA[
+      <p>This option tells the compiler to separate functions into COMDATs 
+      for the linker.</p>
+   ]]> 
+     
+</flag>
+
+<flag name="f-GF" class="optimization" regexp="-GF(?=\s|$)">
+      This option enables read only string-pooling optimization.   
+</flag>
+
+<flag name="f-Gf" class="optimization" regexp="-Gf(?=\s|$)">
+      This option enables read/write string-pooling optimization.    
+</flag>
+
+<flag name="f-Gs" class="optimization" regexp="-Gs(?=\s|$)">
+
+   <![CDATA[
+      <p>This option disables stack-checking for routines with 4096 bytes 
+      of local variables and compiler temporaries.</p>
+   ]]> 
+     
+</flag>
+
+
+</flagsdescription>
