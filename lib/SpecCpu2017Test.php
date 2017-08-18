@@ -134,7 +134,7 @@ class SpecCpu2017Test {
   private function generateRunScript($runspec, $sse, $x64) {
   	$script = sprintf('%s/%s%s%s', $this->options['output'], self::SPEC_CPU_2017_RUN_SCRIPT, $sse ? '_' . $sse : '', $x64 ? '_x64' : '');
   	if ($fp = fopen($script, 'w')) {
-  	  $this->runCounter++;
+#  	  $this->runCounter++;
   		$generated = TRUE;
   		fwrite($fp, "#!/bin/bash\n");
   		fwrite($fp, 'export SPEC=' . $this->options['spec_dir'] . "\n");
@@ -655,15 +655,15 @@ class SpecCpu2017Test {
    */
   private function getSse() {
          $flagmap = array(
-               'CORE-AVX512' => 'avx512f',
-               'CORE-AVX2' => 'avx2',
-               'AVX' => 'avx',
-               'SSE4.2' => 'sse4.2',
-               'SSE4.1' => 'sse4.1',
-               'SSSE3' => 'ssse3',
-               'SSE3' => 'sse3',
+               'SSE' => 'sse',
                'SSE2' => 'sse2',
-               'SSE' => 'sse'
+#               'SSE3' => 'sse3',
+               'SSSE3' => 'ssse3',
+               'SSE4.1' => 'sse4.1',
+               'SSE4.2' => 'sse4.2',
+               'AVX' => 'avx',
+               'CORE-AVX2' => 'avx2',
+               'CORE-AVX512' => 'avx512f'
         );
 
   	// skip sse
@@ -672,7 +672,8 @@ class SpecCpu2017Test {
   		return NULL;
   	}
     
-  	$sse_flags = array('SSE', 'SSE2', 'SSE3', 'SSSE3', 'SSE4.1', 'SSE4.2', 'AVX', 'CORE-AVX2', 'CORE-AVX512');
+#  	$sse_flags = array('SSE', 'SSE2', 'SSE3', 'SSSE3', 'SSE4.1', 'SSE4.2', 'AVX', 'CORE-AVX2', 'CORE-AVX512');
+  	$sse_flags = array('SSE', 'SSE2', 'SSSE3', 'SSE4.1', 'SSE4.2', 'AVX', 'CORE-AVX2', 'CORE-AVX512');
   	$sse = $this->options['sse'];
   	$skip_sse = isset($this->options['sse_skip']) ? $this->options['sse_skip'] : NULL;
   	
@@ -712,9 +713,9 @@ class SpecCpu2017Test {
   }
   
   /**
-   * Moves PDF, CSV, HTML, Text and GIF SPEC CPU 2017 result files to the 
+   * Moves PDF, CSV, HTML, and Text SPEC CPU 2017 result files to the 
    * output directory. Also modifies HTML to reference CSS files hosted on 
-   * cloudharmony.com and new GIF file names
+   * cloudharmony.com
    * @return boolean
    */
   function moveResultFiles($log) {
@@ -732,7 +733,7 @@ class SpecCpu2017Test {
             $pieces = explode('.', $file);
             $id = $pieces[1];
             $type = $pieces[count($pieces) - 1];
-            if (in_array($type, array('pdf', 'csv', 'html', 'txt', 'gif'))) {
+            if (in_array($type, array('pdf', 'csv', 'html', 'txt'))) {
               $path = sprintf('%s/spec%s2017.%s', $this->options['output'], $fp ? 'fp' : 'int', $type);
               exec(sprintf('mv %s %s', $file, $path));
               if (file_exists($path)) {

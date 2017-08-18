@@ -519,12 +519,10 @@ This benchmark generates the following artifacts:
 
 collectd-rrd.zip             collectd RRD files (see --collectd_rrd)
 specint2017.csv              SPECint test results in CSV format
-specint2017.gif              GIF image referenced in the SPECint HTML report
 specint2017.html             HTML formatted SPECint test report
 specint2017.pdf              PDF formatted SPECint test report
 specint2017.txt              Text formatted SPECint test report
 specfp2017.csv               SPECfp test results in CSV format
-specfp2017.gif               GIF image referenced in the SPECfp HTML report
 specfp2017.html              HTML formatted SPECfp test report
 specfp2017.pdf               PDF formatted SPECfp test report
 specfp2017.txt               Text formatted SPECfp test report
@@ -877,7 +875,6 @@ spec_dir
 specspeed2017_fp_peak: peak, speed floating point score (only present if rate=0 and peak=1)
 specspeed2017_fp_base: base, speed floating point score (only present if rate=0 and peak=0)
 specfp_csv: [URL to the SPECfp CSV format report (if save.sh --store option used)]
-specfp_gif: [URL to the SPECfp HTML report GIF image (if save.sh --store option used)]
 specfp_html: [URL to the SPECfp HTML format report (if save.sh --store option used)]
 specfp_pdf: [URL to the SPECfp PDF format report (if save.sh --store option used)]
 specrate2017_fp_peak: peak, rate floating point score (only present if rate=1 and peak=1)
@@ -887,7 +884,6 @@ specfp_text: [URL to the SPECfp text format report (if save.sh --store option us
 specspeed2017_int_peak: peak, speed integer score (only present if rate=0 and peak=1)
 specspeed2017_int_base: base, speed integer score (only present if rate=0 and peak=0)
 specint_csv: [URL to the SPECint CSV format report (if save.sh --store option used)]
-specint_gif: [URL to the SPECint HTML report GIF image (if save.sh --store option used)]
 specint_html: [URL to the SPECint HTML format report (if save.sh --store option used)]
 specint_pdf: [URL to the SPECint PDF format report (if save.sh --store option used)]
 specrate2017_int_peak: peak, rate integer score (only present if rate=1 and peak=1)

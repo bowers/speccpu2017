@@ -40,8 +40,8 @@ if ($db =& BenchmarkDb::getDb()) {
     $iteration = isset($args['iteration']) && preg_match('/([0-9]+)/', $args['iteration'], $m) ? $m[1]*1 : $i + 1;
     // save artifacts
     print_msg(sprintf('Saving results in directory %s', $dir), isset($args['verbose']), __FILE__, __LINE__);
-    foreach(array('specfp2017.csv' => 'nostore_csv', 'specfp2017.gif' => 'nostore_html', 'specfp2027.html' => 'nostore_html', 'specfp2017.pdf' => 'nostore_pdf', 'specfp2017.txt' => 'nostore_text', 
-                  'specint2017.csv' => 'nostore_csv', 'specint2017.gif' => 'nostore_html', 'specint2017.html' => 'nostore_html', 'specint2017.pdf' => 'nostore_pdf',
+    foreach(array('specfp2017.csv' => 'nostore_csv', 'specfp2017.html' => 'nostore_html', 'specfp2017.pdf' => 'nostore_pdf', 'specfp2017.txt' => 'nostore_text', 
+                  'specint2017.csv' => 'nostore_csv', 'specint2017.html' => 'nostore_html', 'specint2017.pdf' => 'nostore_pdf',
                   'collectd-rrd.zip' => 'nostore_rrd', 'specint2017.txt' => 'nostore_text') as $file => $arg) {
       $file = sprintf('%s/%s', $dir, $file);
       if (!isset($args[$arg]) && file_exists($file)) {
