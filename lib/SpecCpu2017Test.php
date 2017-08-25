@@ -34,9 +34,9 @@ class SpecCpu2017Test {
   const SPEC_CPU_2017_DEFAULT_TIMEOUT = 259200;
   
   /*
-   * estimated disk usage per copy (2GB)
+   * estimated disk usage per copy (1GB)
    */
-  const SPEC_CPU_2017_ESTIMATED_DISK_USAGE_MB = 2048;
+  const SPEC_CPU_2017_ESTIMATED_DISK_USAGE_MB = 1024;
   
   /*
    * path to the huge pages library for 32-bit execution
@@ -49,7 +49,7 @@ class SpecCpu2017Test {
   const SPEC_CPU_2017_HUGE_PAGES_LIB64 = '/usr/lib64/libhugetlbfs.so';
   
   /*
-   * estimated disk usage per copy (2GB)
+   * file name to store standard output
    */
   const SPEC_CPU_2017_RUN_OUTPUT_FILE = 'spec.log';
   
@@ -359,7 +359,7 @@ class SpecCpu2017Test {
         $defaults = array(
           'benchmark' => 'all',
           'collectd_rrd_dir' => '/var/lib/collectd/rrd',
-          'copies' => 'x64:100%/2GB|100%/1GB',
+          'copies' => 'x64:100%/1.5GB|100%/1GB',
           'failover_no_sse' => 0,
           'huge_pages' => 0,
           'ignore_errors' => 0,

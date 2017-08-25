@@ -188,15 +188,15 @@ TESTING PARAMETERS
                                               used (e.g. copies=+100%/2GB)
 
                              The general recommend ratio of copies to resources 
-                             is TBD GB of memory for 64 bit binaries,  TBD GB of 
-                             memory for 32 bit binaries, 1 CPU core and TBD GB 
-                             of free disk space. To specify a different number
+                             is 1.5 GB of memory for 64 bit binaries, 1 GB of 
+                             memory for 32 bit binaries, 1 CPU core and 1 GB 
+                             of free disk space.  To specify a different number
                              of copies for 32-bit binaries versus 64-bit 
                              binaries (based on the value of the x64 parameter 
                              defined below), separate the values with a pipe, 
                              and prefix the 64-bit specified value with x64: 
                              (e.g. copies="x64:100%/2GB|100%/1GB")
-                             DEFAULT: x64:100%/1GB|100%/512MB (NULL for speed runs)
+                             DEFAULT: x64:100%/1.5GB|100%/1GB (NULL for speed runs)
 
 * define_*                   additional macros to define using the runspec 
                              --define capability (these will be accessible in 
@@ -371,7 +371,7 @@ TESTING PARAMETERS
 
 * validate_disk_space        Whether or not to validate if there is sufficient 
                              diskspace available for a run - this calculation
-                             is based on a minimum requirement of 2GB per copy
+                             is based on a minimum requirement of 1.5GB per copy
                              If this space is not available, the run will fail
                              DEFAULT: 1
                              
